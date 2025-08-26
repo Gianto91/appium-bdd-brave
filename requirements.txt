@@ -1,0 +1,4 @@
+appium-python-client==3.2.0
+selenium>=4.12,<5
+behave==1.2.6
+allure-behave==2.9.45
