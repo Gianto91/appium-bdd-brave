@@ -1,26 +1,40 @@
-from appium import webdriver
 from appium.options.android import UiAutomator2Options
+from appium import webdriver
 
 def before_scenario(context, scenario):
     caps = {
+        "sessionName": "Prueba Chrome en Kobiton2",
+        "sessionDescription": "Ejecutando Behave con Appium en Chrome",
+        "deviceGroup": "KOBITON",
+        "deviceName": "*",  # cualquier dispositivo disponible
         "platformName": "Android",
-        "platformVersion": "15",
-        "deviceName": "R5CX11BALPY",
         "automationName": "UiAutomator2",
-        "appPackage": "com.brave.browser",
-        "appActivity": "org.chromium.chrome.browser.ChromeTabbedActivity",
-        "appWaitPackage": "com.brave.browser",
-        "appWaitActivity": "org.chromium.chrome.browser.ChromeTabbedActivity",
+        "browserName": "Chrome",  # usar navegador en lugar de apk
         "noReset": True
     }
 
-    options = UiAutomator2Options().load_capabilities(caps)
+    print("=== Capabilities que se envían a Kobiton ===")
+    print(caps)
+
+    kobiton_url = "https://{username}:{apiKey}@api.kobiton.com/wd/hub".format(
+        username="gmpc91",
+        apiKey="82f6c035-11a0-4288-a228-cb0bcc36d2ad"
+    )
+
+    options = UiAutomator2Options()
+    for key, value in caps.items():
+        options.set_capability(key, value)
 
     context.driver = webdriver.Remote(
-        command_executor="http://127.0.0.1:4723",
+        command_executor=kobiton_url,
         options=options
     )
 
 def after_scenario(context, scenario):
+    """Cerrar sesión en Kobiton después de cada escenario"""
     if hasattr(context, "driver"):
-        context.driver.quit()
+        try:
+            context.driver.quit()
+            print("✅ Sesión en Kobiton cerrada correctamente")
+        except Exception as e:
+            print(f"⚠️ Error al cerrar la sesión: {e}")
